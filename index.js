@@ -22,14 +22,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 
-//open routes
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
 
 //Dados Publicos
-app.get("/user/:id", async(req, res) => {
-
+app.get("/user/:id", async(req, res) => { //informações publicas
+    //Chama os dados da pagina de acordo com a url inserida
     const id = req.params.id
 
     const data = await User.findById(id, 'username arrayLinks')
@@ -85,7 +81,7 @@ const { default: mongoose } = require('mongoose');
 app.post('/auth/register', async(req,res) => {
 
 
-    const {username, email, password, img,ig ,list,arrayLinks, idURL, title, linkURL,social ,idIconSocial, href} = req.body
+    const {_id, username, email, password, img,ig ,list,arrayLinks, idURL, title, linkURL,social ,idIconSocial, href} = req.body
 
     //check
     const userExist = await User.findOne({email: email})
@@ -100,7 +96,8 @@ app.post('/auth/register', async(req,res) => {
 
     //create user
     const user = new User({
-        username,
+        _id,//id recebe o nome do usuario, não pode ser alterado
+        username,//username pode ser alterado
         email,
         password: passHash,
         img,
@@ -118,8 +115,9 @@ app.post('/auth/register', async(req,res) => {
     //const dataProfile = new DataProfile({})
     try {
         await user.save()
+        const id = user._id;
         //await dataProfile.save()
-        res.status(201).json({msg:'Usuario criado com sucesso',})
+        res.status(201).json({msg:'Usuario criado com sucesso',id})
 
     } catch (error) {
         console.log(error)
@@ -128,7 +126,7 @@ app.post('/auth/register', async(req,res) => {
 })
 
 app.put('/user/update', async (req, res) => {
-    const { id,email, idURL, title, linkURL, arrayLinks } = req.body;
+    const {id,email, idURL, title, linkURL, arrayLinks } = req.body;
 
     //const userExist = await User.findOne({ email: email });
 
@@ -185,7 +183,9 @@ app.post('/auth/login', async (req,res) => {
             id: user._id,
         },secret
         )
-        res.status(200).json({msg:'Autenticação realizada com sucesso ', token});
+        const id = user._id
+
+        res.status(200).json({msg:'Autenticação realizada com sucesso ', token, id});
     } catch (error) {
         console.log(error)
         res.status(500).json({msg:'Erro no servidor ',});
